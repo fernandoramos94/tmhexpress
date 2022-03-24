@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+}
+
+h1, h2, h3 {
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+h3 span.to {
+    font-size: 12px;
+    position: absolute;
+    left: 0;
+}
+
+h2 span.to {
+    font-size: 16px;
+    position: absolute;
+    left: 0;
+}
+
+.row, .col {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.shipping-card {
+    width: 600px;
+    height: 600px;
+    border: 1px solid;
+    box-sizing: border-box;
+    margin: auto;
+}
+
+.shipping-card div {
+    box-sizing: border-box;
+}
+
+.shipping-card .logo-box {
+    width: 200px;
+    height: 200px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+    display: flex;
+    align-items: center;
+}
+
+.shipping-card .to-box {
+    width: 400px;
+    height: 120px;
+    border-bottom: 1px solid;
+    padding: 1rem;
+}
+
+.shipping-card .priority {
+    text-align: center;
+    border-bottom: 1px solid;
+    height: 80px;
+    padding: 1rem;
+}
+
+.shipping-card .from-box {
+    border-bottom: 1px solid;
+    padding: 1rem;
+    height: 80px;
+}
+
+.shipping-card .order-number {
+    height: 120px;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+    padding: 1rem;
+}
+
+.shipping-card .lot-number, .shipping-card .ship-date, .shipping-card .item-nr, .shipping-card .weight-box {
+    height: 60px;
+    border-bottom: 1px solid;
+    padding: 1rem;
+}
+
+.shipping-card .item-nr {
+    border-right: 1px solid; 
+}
+
+.shipping-card .icons {
+    padding: 1rem;
+    height: 140px;
+    display: flex;
+    align-items: center;
+}
+
+.shipping-card .icons img {
+    display: inline-block;
+}
+
+
+.shipping-card .code-bar {
+    padding: 1rem;
+    text-align: center;
+    height: 140px;
+}
+
+@media (max-width: 768px) {
+    .shipping-card {
+        width: 80%;
+        height: auto;
+    }
+
+    .shipping-card * {
+        border: none;
+        height: auto !important;
+    }
+
+    .shipping-card .logo-box, .shipping-card .to-box {
+        width: 100%;
+    }
+
+    .shipping-card .logo-box, .shipping-card .order-number, .shipping-card .item-nr {
+        border-right: none;
+    }
+  }
