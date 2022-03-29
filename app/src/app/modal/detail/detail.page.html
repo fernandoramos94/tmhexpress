@@ -1,0 +1,35 @@
+<ion-header no-border class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>
+      Detalles
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-label>
+      {{orderDetail.contact}}
+    </ion-label>
+    <ion-icon slot="start" name="person-outline"></ion-icon>
+  </ion-item>
+  <ion-item>
+    <ion-label>
+      {{orderDetail.address}}
+    </ion-label>
+    <ion-icon slot="start" name="home-outline"></ion-icon>
+  </ion-item>
+  <ion-item>
+    <ion-label>
+      {{orderDetail.phone}}
+    </ion-label>
+    <ion-icon slot="start" name="phone-portrait-outline"></ion-icon>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>
+      {{orderDetail.lat}} - {{orderDetail.long}}
+    </ion-label>
+    <ion-icon slot="start" name="locate-outline"></ion-icon>
+  </ion-item>
+</ion-content>

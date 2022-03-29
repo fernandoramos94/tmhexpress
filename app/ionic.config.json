@@ -1,0 +1,7 @@
+{
+  "name": "tmh-express",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
