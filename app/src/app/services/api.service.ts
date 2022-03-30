@@ -15,6 +15,6 @@ export class ApiService {
     return this.http.get(`${this.url}stopsDriver/${code}`);
   }
   getStatus(){
-    return this.http.get<any>(`${this.url}stopsDriver`);
+    return this.http.get<any>(`${this.url}status`);
   }
 }

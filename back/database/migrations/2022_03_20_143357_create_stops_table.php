@@ -21,7 +21,6 @@ class CreateStopsTable extends Migration
             $table->unsignedBigInteger('status_id');
             $table->unsignedBigInteger('cancellationReason_id')->nullable();
             $table->dateTime("date_order");
-            $table->integer("index");
             $table->text("address");
             $table->string("lat");
             $table->string("long");

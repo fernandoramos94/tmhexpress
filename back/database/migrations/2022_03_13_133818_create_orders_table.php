@@ -25,6 +25,7 @@ class CreateOrdersTable extends Migration
             $table->text("destination_address");
             $table->text("origin_address");
             $table->string("type_product");
+            $table->date("date_order");
             $table->string("long_destination");
             $table->string("lat_destination");
             $table->string("long_origin");

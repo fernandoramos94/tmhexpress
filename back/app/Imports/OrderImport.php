@@ -23,6 +23,12 @@ class OrderImport implements ToModel, WithHeadingRow
 
         $km = $data->rows[0]->elements[0]->distance->value / 1000;
 
+        $fecha = date('Y-m-d');
+
+        if(trim(strtolower($row["tipo_entrega"])) != 'hoy' ){
+            $fecha = date('Y-m-d', strtotime($fecha. ' + 1 days'));
+        }
+
         return new Order([
             "contact" => $row["contacto"],
             "identification" => $row["identificacion"],
@@ -39,6 +45,7 @@ class OrderImport implements ToModel, WithHeadingRow
             "weight" => $row["pesokg"],
             "pieces" => $row["numero_piezas"],
             "containt" => $row["breve_descripcion"],
+            "date_order" => $fecha,
             "km" => $km,
             "status_id" => 1,
             "moveType_id" => 1,

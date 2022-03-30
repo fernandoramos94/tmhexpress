@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\StatusOrder;
 use App\Models\Stops;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,6 @@ class StopController extends Controller
                     "driver_id" => $request["driver"],
                     "status_id" =>  $item["status"],
                     "date_order" => now(),
-                    "index" => $request["ind"],
                     "address" => $item["address"],
                     "lat" => $item["lat"],
                     "long" => $item["long"]
@@ -88,7 +88,9 @@ class StopController extends Controller
     public function getStops($imei)
     {
 
-        $data = Stops::select("stops.*")->join("drivers", "stops.driver_id", "=", "drivers.id")->where("drivers.identification_phone" , $imei)->orderBy("index", "asc")->get();
+        $data = Stops::select("stops.*", "orders.contact", "orders.phone")->join("orders", "orders.id", "=", "stops.order_id")->join("drivers", "stops.driver_id", "=", "drivers.id")->where("drivers.identification_phone" , $imei)
+        ->whereDate("stops.date_order", Carbon::now())
+        ->orderBy("index", "asc")->get();
 
         return response()->json(array("data" => $data), 200);
     }

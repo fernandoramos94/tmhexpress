@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  url: "https://tmhexpress.uc.r.appspot.com/api/"
+  // url: "https://tmhexpress.uc.r.appspot.com/api/"
+  url: "http://127.0.0.1:8000/api/"
 };
 
 /*

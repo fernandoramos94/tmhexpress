@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SecredIdController;
+use App\Http\Controllers\StatusController;
 use App\Http\Controllers\StopController;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -41,4 +42,5 @@ Route::post('/updateStatus', [StopController::class, 'updateStop'])->middleware(
 Route::get('/disabledUser/{id}/{status}', [AuthController::class, 'disabledUser'])->middleware('auth:sanctum');
 Route::post('/importOrders', [OrderController::class, 'importData'])->middleware('auth:sanctum');
 Route::get('/stopsDriver/{imei}', [StopController::class, 'getStops']); //->middleware('auth:sanctum');
+Route::get('/status/', [StatusController::class, 'getStatus']); //->middleware('auth:sanctum');
 Route::get('/print_guide/{id}',[OrderController::class, 'printOrder']);

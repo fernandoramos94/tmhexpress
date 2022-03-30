@@ -14,7 +14,15 @@ const routes: Routes = [
   {
     path: 'detail',
     loadChildren: () => import('./modal/detail/detail.module').then( m => m.DetailPageModule)
+  },  {
+    path: 'change-status',
+    loadChildren: () => import('./modal/change-status/change-status.module').then( m => m.ChangeStatusPageModule)
+  },
+  {
+    path: 'map',
+    loadChildren: () => import('./map/map.module').then( m => m.MapPageModule)
   }
+
 ];
 
 @NgModule({

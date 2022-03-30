@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
             'name' => 'Administrador',
             'email' => 'admin@admin.com',
             'password' => Hash::make('TmhExpress2022'),
+            'type_user' => 1
         ]);
     }
 }

@@ -26,3 +26,15 @@ ion-menu-button {
 #container a {
   text-decoration: none;
 }
+
+.options{
+  text-align: center;
+  vertical-align: middle;
+  margin-top: 1rem;
+  ion-icon{
+    font-size: 4rem;
+  }
+  .btn-map{
+    font-size: 4rem;
+  }
+}

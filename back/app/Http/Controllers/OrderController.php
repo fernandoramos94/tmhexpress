@@ -48,6 +48,7 @@ class OrderController extends Controller
             "volume" => $request["volume"],
             "km" => (int)$request["km"] / 1000,
             "type_product" => $request["type_product"],
+            "date_order" => $request["date_order"],
             "email" => $request["email"],
             "user_id" => $request->user()->id,
             "status_id" => 1,
@@ -92,15 +93,15 @@ class OrderController extends Controller
         $data = [];
         if($request->user()->type_user == 2){
             if ($request["column"] == "created_at") {
-                $data = Order::select("orders.*", "status.status")->where("user_id", $request->user()->id)->whereBetween('orders.created_at', [$request["start"] . ' 00:00:00', $request["end"] . ' 23:59:59'])
+                $data = Order::select("orders.*", "status.status")->where("user_id", $request->user()->id)->whereBetween('orders.date_order', [$request["start"], $request["end"] ])
                 ->join("status", "orders.status_id", "=", "status.id")->get();
             }
         }else{
             if ($request["column"] == "created_at") {
-                $data = Order::select("orders.*", "status.status")->whereBetween('orders.created_at', [$request["start"] . ' 00:00:00', $request["end"] . ' 23:59:59'])
+                $data = Order::select("orders.*", "status.status")->whereBetween('orders.date_order', [$request["start"], $request["end"] ])
                 ->join("status", "orders.status_id", "=", "status.id")->get();
             } elseif ($request["column"] == "status") {
-                $data = Order::select("orders.*", "status.status")->whereDate("orders.created_at", Carbon::now())->whereIn('orders.status_id', [1, 5])
+                $data = Order::select("orders.*", "status.status")->whereDate("orders.date_order", Carbon::now())->whereIn('orders.status_id', [1, 5])
                 ->join("status", "orders.status_id", "=", "status.id")->get();
             }
         }
