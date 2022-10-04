@@ -45,46 +45,52 @@
             </td>
             <td style="border: 1px solid; padding-left: 15px;"
                 align="left" valign=middle bgcolor="#FFFFFF">
-                <h2>TO: COMPANY NAME</h2>
+                <h2>ORIGEN:</h2>
                 <span>{{$data->origin_address}}</span>
             </td>
         </tr>
         <tr>
             <td style="border: 1px solid; vertical-align: middle; " align="center" valign=center bgcolor="#FFFFFF">
-                <h1>PRIORITY MAIL</h1>
+
+            @if($data->date_order > date('Y-m-d', strtotime($data->created_at)))
+                <h1>NEXT DAY</h1>
+            @else 
+                <h1>SAME DAY</h1>
+            @endif
+                
             </td>
         </tr>
         <tr>
             <td style="border: 1px solid; padding-left: 15px;"
                 colspan=2 height="55" align="let" valign=middle bgcolor="#FFFFFF">
-                <h2>FROM: COMPANY NAME</h2>
+                <h2>DESTINO:</h2>
                 <span>{{$data->destination_address}}</span>
             </td>
         </tr>
         <tr>
             <td style="border: 1px solid; padding-left: 15px;"
                 rowspan=2 height="100" align="let" valign=middle bgcolor="#FFFFFF">
-                <h3>ORDER NR: {{$data->guide}}</h3>
+                <h3>ORDEN NR: {{$data->guide}}</h3>
                 {!! DNS1D::getBarcodeHTML($data->guide, 'C39') !!}
             </td>
             <td style="border: 1px solid; padding-left: 15px;"
                 align="left" valign=middle bgcolor="#FFFFFF">
-                <h3>LOT NUMBER:</h3>
+                <h3>ORDEN NR: {{$data->guide}}</h3>
             </td>
         </tr>
         <tr>
             <td style="border: 1px solid; padding-left: 15px;"
                 align="left" valign=middle bgcolor="#FFFFFF">
-                <h3>SHIP DATE: {{$data->created_at}}</h3>
+                <h3>FECHA: {{$data->created_at}}</h3>
             </td>
         </tr>
         <tr>
             <td style="border: 1px solid; padding-left: 15px;"
                 height="50" align="left" valign=middle bgcolor="#FFFFFF">
-                <h3>ITEM NR: {{$data->guide}}</h3>
+                <h3>ORDEN NR: {{$data->guide}}</h3>
             </td>
             <td style="border: 1px solid; padding-left: 15px;" align="left" valign=middle bgcolor="#FFFFFF">
-                <h3>WEIGHT: {{$data->weight}} Kg</h3>
+                <h3>PESO: {{$data->weight}} Kg</h3>
             </td>
         </tr>
         <tr >

@@ -25,9 +25,11 @@ class OrderImport implements ToModel, WithHeadingRow
 
         $fecha = date('Y-m-d');
 
-        if(trim(strtolower($row["tipo_entrega"])) != 'hoy' ){
+        if(trim(strtolower($row["tipo_entrega"])) != 'same day' ){
             $fecha = date('Y-m-d', strtotime($fecha. ' + 1 days'));
         }
+
+        $user = auth()->user();
 
         return new Order([
             "contact" => $row["contacto"],
@@ -41,15 +43,14 @@ class OrderImport implements ToModel, WithHeadingRow
             "long_origin" => $row["longitud_origen"],
             "lat_destination" => $row["latitud_destino"],
             "long_destination" => $row["longitud_destino"],
-            "volume" => $row["volumencm3"],
             "weight" => $row["pesokg"],
             "pieces" => $row["numero_piezas"],
             "containt" => $row["breve_descripcion"],
             "date_order" => $fecha,
             "km" => $km,
-            "status_id" => 1,
+            "status_id" => 8,
             "moveType_id" => 1,
-            "user_id" => 1,
+            "user_id" => $user->id,
             "guide" => $ord->generateUniqueCode()
         ]);
     }

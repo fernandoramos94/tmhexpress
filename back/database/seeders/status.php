@@ -27,6 +27,8 @@ class status extends Seeder
                 'status' => 'Pendiente por entregar'
             ], [
                 'status' => 'Pedido cancelado por el conductor'
+            ],[
+                'status' => 'Pedido cancelado por el administrador'
             ]
         ]);
     }

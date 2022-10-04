@@ -20,10 +20,11 @@ class CreateStopsTable extends Migration
             $table->unsignedBigInteger('driver_id');
             $table->unsignedBigInteger('status_id');
             $table->unsignedBigInteger('cancellationReason_id')->nullable();
-            $table->dateTime("date_order");
+            $table->date("date_order");
             $table->text("address");
             $table->string("lat");
             $table->string("long");
+            $table->integer("finish")->default(0);
             $table->text("comment_cancellation")->nullable();
             $table->text("comment_delivery")->nullable();
             $table->text("comment_pickup")->nullable();
@@ -32,6 +33,7 @@ class CreateStopsTable extends Migration
             $table->text("photo_pickup")->nullable();
             $table->text("signature_delivery")->nullable();
             $table->text("signature_pickup")->nullable();
+            $table->integer("index");
             
             $table->timestamps();
 

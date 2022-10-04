@@ -15,18 +15,29 @@ env_variables:
   STORAGE_DIR: /tmp
   APP_KEY: base64:icfMCnbFlVe6vi4pLyO44h53DJJuaOWIoxihuq5Gq/0=
   DB_DATABASE: tmhexpress
-  APP_DEBUG: false
+  APP_DEBUG: true
   DB_PORT: 3306
   DB_CONNECTION: mysql
   DB_USERNAME: root
-  DB_PASSWORD: i1rK9xumy6w5Ov5i
+  DB_PASSWORD: Tmh_express2022
   DB_SOCKET: "/cloudsql/tmhexpress:us-central1:tmhexpress2022"
 
-  MAIL_DRIVER: smtp
-  MAIL_HOST: smtp.sparkpostmail.com
-  MAIL_PORT: 587
-  MAIL_USERNAME: 
-  MAIL_PASSWORD: 
+  MAIL_MAILER: smtp
+  MAIL_HOST: smtp.gmail.com
+  MAIL_PORT: 465
+  MAIL_USERNAME: no-reply@tmhexpress.com
+  MAIL_PASSWORD: Express2022
+  MAIL_ENCRYPTION: ssl
+  MAIL_FROM_ADDRESS: no-reply@tmhexpress.com
+  MAIL_FROM_NAME: "Tmh Express"
+  
+  OPENPAY_ID: m8gspclcgufguvbqiwkz
+  OPENPAY_SK: sk_12bea4eb3be0417babc4fd22b07274ae
+  OPENPAY_PRODUCTION_MODE: false
+
+  FILESYSTEM_CLOUD: gcs
+  GOOGLE_CLOUD_PROJECT_ID: tmhexpress
+  GOOGLE_CLOUD_STORAGE_BUCKET: tmhexpress.appspot.com
 
 beta_settings:
   cloud_sql_instances: "tmhexpress:us-central1:tmhexpress2022"
