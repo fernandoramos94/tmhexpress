@@ -530,7 +530,7 @@ class OrderController extends Controller
             "package.dimensions.pieces" => "required",
             "package.dimensions.weight" => "required",
             "package.product_type" => "required",
-            "package.containt" => "required"
+            "package.content" => "required"
         ])->validate();
         
         $data = Order::create([
