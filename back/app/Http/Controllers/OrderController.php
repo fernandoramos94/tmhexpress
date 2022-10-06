@@ -517,7 +517,7 @@ class OrderController extends Controller
         }
 
         Validator::make($request->all(), [
-            'contact.number_identification' => 'required',
+            'contact.indentification_number' => 'required',
             "contact.full_name" => "required",
             "contact.phone" => "required",
             "contact.email" => "required",
@@ -535,7 +535,7 @@ class OrderController extends Controller
         
         $data = Order::create([
             "contact" => $request["contact"]["full_name"],
-            "identification" => $request["contact"]["number_identification"],
+            "identification" => $request["contact"]["indentification_number"],
             "destination_address" => $request["destination"]["address"],
             "phone" => $request["contact"]["phone"],
             "pieces" => $request["package"]["dimensions"]["pieces"],
