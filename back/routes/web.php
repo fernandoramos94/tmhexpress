@@ -20,6 +20,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
+
 Route::get('print_guide/{id}',[OrderController::class, 'printOrder']);
 Route::get('download_list/{id}',[OrderController::class, 'downloadOrder']);
 
