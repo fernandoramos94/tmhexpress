@@ -7,6 +7,8 @@ use App\Models\Balance;
 use App\Models\Order;
 use App\Models\StatusOrder;
 use App\Models\Stops;
+use App\Models\GroupCode;
+use App\Models\Route;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -54,6 +56,9 @@ class OrderController extends Controller
             }
         }
 
+        $zone = GroupCode::where('codes', 'LIKE', '%'.intval(''.$request["zip_code"]).'%')->first();
+    
+
         $data = Order::create([
             "contact" => $request["contact"],
             "identification" => $request["identification"],
@@ -76,8 +81,10 @@ class OrderController extends Controller
             "email" => $request["email"],
             "user_id" => $request->user()->id,
             "status_id" => 8,
-            "moveType_id" => 1,
-            "guide" => $this->generateUniqueCode()
+            "moveType_id" => 2,
+            "guide" => $this->generateUniqueCode(),
+            "zip_code" => intval(''.$request["zip_code"]),
+            "zone" => $zone->name
         ]);
 
         StatusOrder::create([
@@ -153,11 +160,14 @@ class OrderController extends Controller
                 // ->toSql();
                 // ->get();
             } elseif ($request["column"] == "status") {
-                $data = Order::select("orders.*", "status.status")->whereIn('orders.status_id', [1, 5])
+                $data = Order::select("orders.*", "status.status")->whereIn('orders.status_id', [1, 5, 8])
                 ->join("status", "orders.status_id", "=", "status.id")->get();
-
-                // $data = Order::select("orders.*", "status.status")->whereDate("orders.date_order", Carbon::now())->whereIn('orders.status_id', [1, 5])
-                // ->join("status", "orders.status_id", "=", "status.id")->get();
+            }else if($request["column"] == 'route'){
+                $data = DB::select("SELECT orders.*, JSON_LENGTH(routes.data) as co FROM 
+                orders
+                LEFT JOIN routes on
+                json_contains(data->'$[*].order_id', json_array(orders.id))
+                where orders.status_id in (1, 5, 8) and JSON_LENGTH(routes.data) is null;");
             }
         }
         
@@ -289,97 +299,91 @@ class OrderController extends Controller
     {
         date_default_timezone_set('America/Mexico_City');
 
-        $pending = Order::select('id', 'origin_address as address', 'lat_origin as lat', 'long_origin as long',  DB::raw('"1" as status'), DB::raw('"1" as moveType'), DB::raw('"0" as ind'))
-            ->where("status_id", 1)
-            ->whereIn("id", $request["data"])
-            ->get()->toArray();
+        $info = DB::select("
+            select zone as zona, SUM(1) as stops, 0 as kms, 0 as hour, 'En proceso' as status,
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'order_id', id,
+                    'lat', lat_destination,
+                    'long', long_destination,
+                    'address', destination_address,
+                    'km', 0,
+                    'hour', 0,
+                    'entregado', 0,
+                    'fallido', 0
+               )
+            )as data,
+            JSON_OBJECT(
+                'id', '',
+                'name', ''
+            ) as driver
+            FROM orders
+            WHERE id in( ".implode(",",$request["data"])." ) 
+            AND  (status_id = 1 or status_id = 5 or status_id = 8)
+            GROUP BY zone"
+        );
 
-        $destination = Order::select('id', 'destination_address as address', 'lat_destination as lat', 'long_destination as long',  DB::raw('"1" as status'), DB::raw('"2" as moveType'), DB::raw('"0" as ind'))
-            ->where("status_id", 1)
-            ->whereIn("id", $request["data"])
-            ->get()->toArray();
+        foreach ($info as $item) {
 
-        $pending_delivery =  Order::select('id', 'destination_address as address', 'lat_destination as lat', 'long_destination as long',  DB::raw('"5" as status'), DB::raw('"2" as moveType'), DB::raw('"0" as ind'))
-            ->where("status_id", 5)
-            ->whereIn("id", $request["data"])
-            ->get()->toArray();
+            $item->data = json_decode($item->data);
+            $item->driver = json_decode($item->driver);
+            $dataArray = $item->data;
+            for ($i=0; $i < count($dataArray) ; $i++) { 
+                $from = "19.573382081680197, -99.2023109033435"; //direccion de thmexpress
+                $to = $dataArray[$i]->lat . "," . $dataArray[$i]->long;
 
-        $locations = array_merge($pending, $destination, $pending_delivery);
+                $from = urlencode($from);
+                $to = urlencode($to);
 
-        for ($i = 0; $i < count($locations); $i++) {
-            $from = "19.573382081680197, -99.2023109033435"; //direccion de thmexpress
-            $to = $locations[$i]["lat"] . "," . $locations[$i]["long"];
+                $data = $this->calculate($from, $to);
+                $dataArray[$i]->km = $data->rows[0]->elements[0]->distance->value / 1000;
+                $item->kms += $data->rows[0]->elements[0]->distance->value;
+                $item->hour += $data->rows[0]->elements[0]->duration->value;
+                $dataArray[$i]->hour += $data->rows[0]->elements[0]->duration->value;
+            }
+        }
+        $dataIDS = [];
 
-            $from = urlencode($from);
-            $to = urlencode($to);
+        foreach ($info as $item) {
+            $locations = $item->data;
+            $item->hour = $this->convertMin($item->hour);
+            $item->kms = $item->kms / 1000;
+            array_multisort(array_column($locations, "km"),SORT_ASC,$locations);
 
-            $data = $this->calculate($from, $to);
-            $locations[$i]["km"] = $data->rows[0]->elements[0]->distance->value / 1000;
+            $id = Route::insertGetId([
+                "zone" => $item->zona,
+                "kms" => $item->kms,
+                "hours" => $item->hour,
+                "stops" => $item->stops,
+                "status" => $item->status,
+                "data" => json_encode($item->data),
+                "driver"=> json_encode($item->driver)
+            ]);
+
+            $dataIDS[] = $id;
         }
         
-        array_multisort(array_column($locations, "km"),SORT_ASC,$locations);
 
-        $index = 0;
+        $dataReturn = Route::whereIn("id", $dataIDS)->get();
 
-        $dataArray = [];
-        for ($b=0; $b < count($locations); $b++) { 
-            if($locations[$b]["moveType"] == 2 && $locations[$b]["status"] == 1){
-                continue;
-            }else{
-                $dataArray[] = $locations[$b];
-                unset($locations[$b]);
-                break;
-            }
+        foreach ($dataReturn as $item) {
+            $item->data = json_decode($item->data);
+            $item->driver = json_decode($item->driver);
+            $item->reasign_driver = $item->driver->id != "" ? true : false;
+            
         }
-        $cont = count($locations);
-        while ($cont != 0) {
+        
+        return $dataReturn;
+    }
 
-            $lat_current = $dataArray[count($dataArray)-1]["lat"];
-            $long_current = $dataArray[count($dataArray)-1]["long"];
-
-            if(count($locations) > 1){
-                for ($a=$index; $a < count($locations) ; $a++) { 
-                    $locations = $this->resetKey($locations);
-                    $from = $lat_current.",".$long_current;
-                    $to = $locations[$a]["lat"] . "," . $locations[$a]["long"];
-                    $data = $this->calculate($from, $to);
-                    $locations[$a]["km"] = $data->rows[0]->elements[0]->distance->value / 1000;
-                }
-                array_multisort(array_column($locations, "km"),SORT_ASC,$locations);
-
-                for ($c=0; $c < count($locations); $c++) { 
-                    $locations = $this->resetKey($locations);
-                    $dataI = $locations[$c]["id"];
-                    $exist = array_filter($dataArray, function($key) use($dataI){
-                        if($key["id"] == $dataI){
-                            return $key;
-                        }
-                    });
-
-                    if(count($exist)){
-                        $locations = $this->resetKey($locations);
-                        $dataArray[] = $locations[$c];
-                        unset($locations[$c]);
-                        break;
-                    }else{
-                        if($locations[$c]["moveType"] == 2 && $locations[$c]["status"] == 1){
-                            continue;
-                        } else{
-                            $dataArray[] = $locations[$c];
-                            unset($locations[$c]);
-                            break;
-                        }
-                    }
-                }
-                
-            }else{
-                $dataArray[] = isset($locations[1]) ? $locations[1] : $locations[0];
-            }
-
-            $cont--;
-        }
-
-        return $dataArray;
+    public function convertMin($m){
+        $d = (int)($m/1440);
+        $m -= $d*1440;
+         
+        $h = (int)($m/60);
+        $m -= $h*60;
+         
+        return $h.":".$m." hrs"; // array("horas" => $h, "minutos" => $m);
     }
 
     public function resetKey($data){
@@ -419,7 +423,7 @@ class OrderController extends Controller
 
     public function calculate($from, $to)
     {
-        $data = file_get_contents("https://maps.googleapis.com/maps/api/distancematrix/json?origins=$from&destinations=$to&language=es&sensor=false&key=AIzaSyBWIY8YFM3ckW2GxD-ATDeAq2TiHDDfteg");
+        $data = file_get_contents("https://maps.googleapis.com/maps/api/distancematrix/json?origins=$from&destinations=$to&language=es&sensor=false&key=AIzaSyBM_WtvsMz7WElOeqC1uRaVhKddjOpENMk");
         return json_decode($data);
     }
 

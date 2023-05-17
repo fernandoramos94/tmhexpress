@@ -10,6 +10,7 @@ use App\Http\Controllers\ConfWeightController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\OpenPayController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RouteController;
 use App\Http\Controllers\SecredIdController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\StopController;
@@ -97,6 +98,12 @@ Route::get('/code/delete/{id}', [ZipCodeController::class, 'delete'])->middlewar
 
 Route::post('/payment', [OpenPayController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/balance', [BalanceController::class, 'getData'])->middleware('auth:sanctum');
+
+
+// rutas
+Route::post('/routes', [RouteController::class, 'list'])->middleware('auth:sanctum');
+Route::post('/routes/asignedDriver', [RouteController::class, 'asignedDriver'])->middleware('auth:sanctum');
+Route::get('/routes/{id}', [RouteController::class, 'getRoute'])->middleware('auth:sanctum');
 
 // configuracion de precios
 

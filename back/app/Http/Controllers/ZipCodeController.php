@@ -29,14 +29,16 @@ class ZipCodeController extends Controller
     }
     public function getByCode($code)
     {
-        $data = ZipCode::where("code", $code)->get();
+        $code = ''.$code;
+        $data = ZipCode::where("code", "like", "%". intval($code)."%")->get();
 
         return response()->json($data, 200);
     }
 
     public function getByCodeApi($code)
     {
-        $data = ZipCode::where("code", $code)->get();
+        $code = ''.$code;
+        $data = ZipCode::where("code", "like", "%". intval($code)."%")->get();
 
         if(count($data)){
             return response()->json([

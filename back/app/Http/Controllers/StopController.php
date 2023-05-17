@@ -13,39 +13,49 @@ use Illuminate\Support\Facades\Storage;
 
 class StopController extends Controller
 {
-    public function add(Request $request)
+    public function add($data, $resign_driver)
     {
 
-        $query = Stops::where("driver_id", $request["driver"])->whereDate("date_order", Carbon::now())->orderBy("index", "desc")->limit(1)->first();
-
-        $index = !(array)$query ? 0 : $query->index;
-        
         try {
-            foreach ($request["stops"] as $item) {
-                Stops::create([
-                    "order_id" => $item["id"],
-                    "moveType_id" => $item["moveType"],
-                    "driver_id" => $request["driver"],
-                    "status_id" =>  $item["status"],
-                    "date_order" => Carbon::now(),
-                    "address" => $item["address"],
-                    "lat" => $item["lat"],
-                    "long" => $item["long"],
-                    "index" => (int)$index + 1
-                ]);
 
-                Order::where("id", $item["id"])->update([
-                    "status_id" => 2
-                ]);
+            $driver = json_decode($data->driver);
+            $query = Stops::where("driver_id", $driver->id)->whereDate("date_order", Carbon::now())->orderBy("index", "desc")->limit(1)->first();
+            $index = !(array)$query ? 0 : $query->index;
 
-                StatusOrder::create([
-                    "order_id" => $item["id"],
-                    "status_id" => 2
-                ]);
+            $stops = json_decode($data->data);
 
-                // $this->sendEmail($item["id"]);
+            
 
-                $index++;
+            foreach ($stops as $item) {
+                if($resign_driver == false){
+                    Stops::create([
+                        "order_id" => $item->order_id,
+                        "moveType_id" => 2,//$item["moveType"],
+                        "driver_id" => $driver->id,
+                        "status_id" => 2, //$item["status"],
+                        "date_order" => Carbon::now(),
+                        "address" => $item->address,
+                        "lat" => $item->lat,
+                        "long" => $item->long,
+                        "index" => (int)$index + 1
+                    ]);
+    
+                    Order::where("id", $item->order_id)->update([
+                        "status_id" => 2
+                    ]);
+    
+                    StatusOrder::create([
+                        "order_id" => $item->order_id,
+                        "status_id" => 2
+                    ]);
+    
+                    $index++;
+                }else{
+                    Stops::where("order_id", $item->order_id)->pdate([
+                        "driver_id" => $driver->id
+                    ]);
+                }
+                
             }
 
             return response()->json(array("message" => "Se han asignado las ordenes al driver de forma exitosa."), 200);
