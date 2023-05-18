@@ -67,7 +67,7 @@ Route::post("/driver/update", [DriverController::class, 'update']);
 Route::post("/driver/disabled", [DriverController::class, 'disabled']);
 
 Route::get("/order/verifidDriver/{id}", [OrderController::class, 'validateOrderDriver']);
-Route::get("/order/verifidAdmin/{id}", [OrderController::class, 'validateOrderAdmin'])->middleware("auth:sanctum");
+Route::get("/order/verifidAdmin/{id}", [OrderController::class, 'validateOrderAdmin']);
 Route::get("/order/list/verifid", [OrderController::class, 'getOrdersForVerifiqued'])->middleware("auth:sanctum");
 Route::get("/order/list/verifid/admin", [OrderController::class, 'getOrdersForVerifiquedAdmin'])->middleware("auth:sanctum");
 Route::post("/order/update/verifid", [OrderController::class, 'updateStatusVerifiqued'])->middleware("auth:sanctum");
