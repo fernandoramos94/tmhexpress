@@ -182,7 +182,7 @@ class StopController extends Controller
 
         $name = $na.".". explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $disk->put($name, file_get_contents($data));
 
         $disk->setVisibility($name, 'public');
