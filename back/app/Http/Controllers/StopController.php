@@ -183,13 +183,13 @@ class StopController extends Controller
         $name = $na.".". explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
 
         $disk = Storage::disk('local');
-        $disk->put($name, file_get_contents($data));
+        $disk->put($name, base64_decode($data));
 
-        $disk->setVisibility($name, 'public');
+        // $disk->setVisibility($name, 'public');
         
-        $url = $disk->url($name);
+        // $url = $disk->url($name);
 
-        return $url;
+        return $name;
     }
 
     public function cancelStop(Request $request)
