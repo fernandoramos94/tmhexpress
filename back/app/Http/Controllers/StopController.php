@@ -109,11 +109,11 @@ class StopController extends Controller
             $data = [];
 
             if(!is_null($request["signature"])){
-                $signature = $request["signature"]; //$this->createImageFromBase64($request["signature"], '1'.date('YmdHisu'));
+                $signature = $this->createImageFromBase64($request["signature"], '1'.date('YmdHisu'));
             }
             if(!is_null($request["evidence"])){
                 
-                $evidence = $request["evidence"];//$this->createImageFromBase64($request["evidence"], '2'.date('YmdHisu'));
+                $evidence = $this->createImageFromBase64($request["evidence"], '2'.date('YmdHisu'));
             }
                         
             if ($request["type"] == "pickup") {
@@ -165,7 +165,7 @@ class StopController extends Controller
                 Order::where("id", $request["order_id"])->update(["status_id" => 4]);
             }
 
-            $this->sendEmail($request["order_id"]);
+            // $this->sendEmail($request["order_id"]);
 
 
 
@@ -180,16 +180,16 @@ class StopController extends Controller
     public function createImageFromBase64($data, $na)
     {
 
-        // $name = $na.".". explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
+        $name = $na.".". explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
 
-        // $disk = Storage::disk('local');
-        // $disk->put($name, base64_decode($data));
+        $disk = Storage::disk('local');
+        $disk->put($name, base64_decode($data));
 
-        // // $disk->setVisibility($name, 'public');
+        // $disk->setVisibility($name, 'public');
         
-        // // $url = $disk->url($name);
+        $url = $disk->url($name);
 
-        // return $name;
+        return $url;
     }
 
     public function cancelStop(Request $request)
