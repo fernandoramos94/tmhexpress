@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\StatusOrder;
 use App\Models\Stops;
 use App\Models\GroupCode;
+use App\Models\Log;
 use App\Models\Route;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -361,6 +362,14 @@ class OrderController extends Controller
             ]);
 
             $dataIDS[] = $id;
+
+            Log::insert([
+                "route_id" => $id,
+                "user" => $request->user()->name,
+                "type_user" => 1,
+                "type" => "Creación de ruta",
+                "msg" => "Realizado por ". $request->user()->name
+            ]);
         }
         
 
@@ -419,7 +428,6 @@ class OrderController extends Controller
 
         return $locations;
     }
-
 
     public function calculate($from, $to)
     {

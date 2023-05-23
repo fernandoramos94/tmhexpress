@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use App\Models\Order;
+use App\Models\Route;
 use App\Models\StatusOrder;
 use App\Models\Stops;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,9 +33,9 @@ class StopController extends Controller
                 if($resign_driver == false){
                     Stops::create([
                         "order_id" => $item->order_id,
-                        "moveType_id" => 2,//$item["moveType"],
+                        "moveType_id" => 2,
                         "driver_id" => $driver->id,
-                        "status_id" => 2, //$item["status"],
+                        "status_id" => 2,
                         "date_order" => Carbon::now(),
                         "address" => $item->address,
                         "lat" => $item->lat,
@@ -51,7 +54,7 @@ class StopController extends Controller
     
                     $index++;
                 }else{
-                    Stops::where("order_id", $item->order_id)->pdate([
+                    Stops::where("order_id", $item->order_id)->update([
                         "driver_id" => $driver->id
                     ]);
                 }
@@ -72,7 +75,6 @@ class StopController extends Controller
             ->join("move_type", "stops.moveType_id", "=", "move_type.id")
             ->join("status", "stops.status_id", "=", "status.id")
             ->leftjoin("cancellation_reason", "stops.cancellationReason_id", "=", "cancellation_reason.id")
-            // ->where([["order_id", "=", $id],["finish", "=", 1]])
             ->where([["order_id", "=", $id]])
             ->get();
 
@@ -82,11 +84,20 @@ class StopController extends Controller
     public function getStops($imei)
     {
 
-        $data = Stops::select("stops.*", "orders.contact", "orders.phone")->join("orders", "orders.id", "=", "stops.order_id")
-            ->join("drivers", "stops.driver_id", "=", "drivers.id")
-            ->where([["drivers.identification_phone", "=", $imei], ["finish", "=", 0]])
-            ->whereDate("stops.date_order", Carbon::now())
-            ->orderBy("index", "asc")->get();
+        // $data = Stops::select("stops.*", "orders.contact", "orders.phone", "orders.zip_code")->join("orders", "orders.id", "=", "stops.order_id")
+        //     ->join("drivers", "stops.driver_id", "=", "drivers.id")
+        //     ->where([["drivers.identification_phone", "=", $imei], ["finish", "=", 0]])
+        //     ->whereDate("stops.date_order", Carbon::now())
+        //     ->orderBy("index", "asc")->toSql();
+
+
+        $data = DB::select("
+            select stops.*, orders.contact, orders.phone, orders.zip_code, routes.id as route_id from stops 
+            inner join orders on orders.id = stops.order_id 
+            inner join drivers on stops.driver_id = drivers.id 
+            LEFT JOIN routes on json_contains(data->'$[*].order_id', json_array(orders.id))
+            where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '2023-05-23' order by stops.index asc
+        ");
 
         return response()->json(array("data" => $data), 200);
     }
@@ -165,6 +176,40 @@ class StopController extends Controller
                 Order::where("id", $request["order_id"])->update(["status_id" => 4]);
             }
 
+            $route = Route::find($request["route_id"]);
+
+            $orders = json_decode($route->data);
+            $driver = json_decode($route->driver);
+            $counts = count($orders);
+            $execute = 0;
+            foreach ($orders as $item) {
+                if($item->order_id == $request["order_id"]){
+                    $item->entregado = 1;
+
+                    $execute += 1;
+                }
+
+                if((int)$item->entregado > 0 || (int)$item->fallido > 0 ){
+                    $execute += 1;
+                }
+            }
+
+            Route::where("id", $request["route_id"])->update([
+                "data" => json_encode($orders)
+            ]);
+
+            if($counts == $execute){
+                Log::insert([
+                    "route_id" => $request["route_id"],
+                    "user" => $driver->name,
+                    "type_user" => 2,
+                    "type" => "Finalizado",
+                    "msg" => "Realizado por ". $driver->name
+                ]);
+            }
+
+            
+
             // $this->sendEmail($request["order_id"]);
 
 
@@ -224,6 +269,39 @@ class StopController extends Controller
             Stops::where("order_id", $request["order_id"])->update(["finish" => 1]);
 
             Order::where("id", $request["order_id"])->update(["status_id" => 6]);
+
+
+            $route = Route::find($request["route_id"]);
+
+            $orders = json_decode($route->data);
+            $driver = json_decode($route->driver);
+            $counts = count($orders);
+            $execute = 0;
+            foreach ($orders as $item) {
+                if($item->order_id == $request["order_id"]){
+                    $item->fallido = 1;
+
+                    $execute += 1;
+                }
+
+                if((int)$item->entregado > 0 || (int)$item->fallido > 0 ){
+                    $execute += 1;
+                }
+            }
+
+            Route::where("id", $request["route_id"])->update([
+                "data" => json_encode($orders)
+            ]);
+
+            if($counts == $execute){
+                Log::insert([
+                    "route_id" => $request["route_id"],
+                    "user" => $driver->name,
+                    "type_user" => 2,
+                    "type" => "Finalizado",
+                    "msg" => "Realizado por ". $driver->name
+                ]);
+            }
 
             return response()->json([
                 "message" => "Proceso realizado con existo"
