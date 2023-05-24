@@ -96,7 +96,7 @@ class StopController extends Controller
             inner join orders on orders.id = stops.order_id 
             inner join drivers on stops.driver_id = drivers.id 
             LEFT JOIN routes on json_contains(data->'$[*].order_id', json_array(orders.id))
-            where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()."' order by stops.index asc
+            where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()->toDateString()."' order by stops.index asc
         ");
 
         return response()->json(array("data" => $data, "orwr" => Carbon::now()), 200);
