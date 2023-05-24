@@ -99,7 +99,7 @@ class StopController extends Controller
             where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()."' order by stops.index asc
         ");
 
-        return response()->json(array("data" => $data), 200);
+        return response()->json(array("data" => $data, "orwr" => Carbon::now()), 200);
     }
 
     public function getStopsFinish($imei)
