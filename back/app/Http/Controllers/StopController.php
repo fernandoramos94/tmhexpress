@@ -176,7 +176,7 @@ class StopController extends Controller
                 Order::where("id", $request["order_id"])->update(["status_id" => 4]);
             }
 
-            $route = Route::find($request["route_id"]);
+            $route = Route::where("id",$request["route_id"])->first();
 
             $orders = json_decode($route->data);
             $driver = json_decode($route->driver);
