@@ -65,7 +65,7 @@ class RouteController extends Controller
     }
     public function getRoute($id)
     {
-        $data = Route::where("id",$id)->first();
+        $data = collect(DB::select("select sum(fallidos) as fallidos, sum(entregados) as entregados, routes.*  from routes, JSON_TABLE(data, '$[*]' COLUMNS (fallidos INT PATH '$.fallido', entregados INT PATH '$.entregado')) as t where id= ".$id." group by id"))->first();
         $data->driver = json_decode($data->driver);
         $data->data = json_decode($data->data);
         $data->packages = count($data->data);
