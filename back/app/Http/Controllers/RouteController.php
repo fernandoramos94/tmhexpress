@@ -65,7 +65,7 @@ class RouteController extends Controller
     }
     public function getRoute($id)
     {
-        $data = collect(DB::select("select sum(fallidos) as fallidos, sum(entregados) as entregados, routes.*  from routes, JSON_TABLE(data, '$[*]' COLUMNS (fallidos INT PATH '$.fallido', entregados INT PATH '$.entregado')) as t where id= ".$id." group by id"))->first();
+        $data = collect(DB::select("select sum(fallidos) as fails, sum(entregados) as delivered, routes.*  from routes, JSON_TABLE(data, '$[*]' COLUMNS (fallidos INT PATH '$.fallido', entregados INT PATH '$.entregado')) as t where id= ".$id." group by id"))->first();
         $data->driver = json_decode($data->driver);
         $data->data = json_decode($data->data);
         $data->packages = count($data->data);
@@ -78,6 +78,8 @@ class RouteController extends Controller
             // $stop = Stops::select("")->where("orden_id", $item->order_id)->first();
             $item->order = $order;
         }
+
+        $data->history = Log::where("route_id", $data->route_id)->get();
 
         return response()->json($data, 200);
     }
