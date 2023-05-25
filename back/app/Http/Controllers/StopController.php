@@ -84,12 +84,6 @@ class StopController extends Controller
     public function getStops($imei)
     {
 
-        // $data = Stops::select("stops.*", "orders.contact", "orders.phone", "orders.zip_code")->join("orders", "orders.id", "=", "stops.order_id")
-        //     ->join("drivers", "stops.driver_id", "=", "drivers.id")
-        //     ->where([["drivers.identification_phone", "=", $imei], ["finish", "=", 0]])
-        //     ->whereDate("stops.date_order", Carbon::now())
-        //     ->orderBy("index", "asc")->toSql();
-
 
         $data = DB::select("
             select stops.*, orders.contact, orders.phone, orders.zip_code, routes.id as route_id from stops 

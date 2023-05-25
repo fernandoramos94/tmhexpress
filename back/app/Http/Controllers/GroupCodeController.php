@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\GroupCode;
+use Illuminate\Http\Request;
+
+class GroupCodeController extends Controller
+{
+
+    public function list()
+    {
+        $data = GroupCode::get();
+
+        foreach ($data as $item) {
+            $item->codes = json_decode($item->codes);
+        }
+
+        return response()->json($data, 200);
+    }
+    public function add(Request $request)
+    {
+        GroupCode::insert([
+            "name" => $request["name"],
+            "codes" => json_encode($request["code"])
+        ]);
+
+        return response()->json(["ok" => true, "msg" => "Proceso realizado con exito"], 200);
+    }
+    public function update(Request $request)
+    {
+        GroupCode::where("id", $request["id"])->update([
+            "name" => $request["name"],
+            "codes" => json_encode($request["code"])
+        ]);
+
+        return response()->json(["ok" => true, "msg" => "Proceso realizado con exito"], 200);
+    }
+
+    public function delete($id)
+    {
+        GroupCode::where("id", $id)->delete();
+
+        return response()->json(["ok" => true, "msg" => "Proceso realizado con exito"], 200);
+    }
+}

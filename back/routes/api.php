@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConfKmController;
 use App\Http\Controllers\ConfWeightController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\GroupCodeController;
 use App\Http\Controllers\OpenPayController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RouteController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\SecredIdController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\StopController;
 use App\Http\Controllers\ZipCodeController;
+use App\Models\GroupCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -121,3 +123,11 @@ Route::get('/configuration/weight/delete/{id}', [ConfWeightController::class, 'd
 Route::post('/generateCode', [AccountController::class, 'generateCode']);
 Route::post('/sendRecovery', [AccountController::class, 'send_password']);
 Route::post('/recoveryPassword', [AccountController::class, 'recovery_password']);
+
+
+// group code
+
+Route::get('/groupCode', [GroupCodeController::class, 'list'])->middleware("auth:sanctum");
+Route::post('/groupCode/add', [GroupCodeController::class, 'add'])->middleware("auth:sanctum");
+Route::post('/groupCode/update', [GroupCodeController::class, 'update'])->middleware("auth:sanctum");
+Route::get('/groupCode/{id}/delete', [GroupCodeController::class, 'delete'])->middleware("auth:sanctum");
