@@ -15,7 +15,7 @@ class RouteController extends Controller
 {
     public function list(Request $request)
     {
-        $data = DB::select("SELECT routes.*, SUM(JSON_EXTRACT(data, '$[*].fallido')) fallidos, SUM(JSON_EXTRACT(data, '$[*].entregado')) entregados from routes GROUP BY id;");
+        $data = DB::select("select sum(fallidos) as fallidos, sum(entregados) as entregados, routes.*  from routes, JSON_TABLE(data, '$[*]' COLUMNS (fallidos INT PATH '$.fallido', entregados INT PATH '$.entregado')) as t");
         foreach ($data as $item) {
             $item->data = json_decode($item->data);
             $item->driver = json_decode($item->driver);
