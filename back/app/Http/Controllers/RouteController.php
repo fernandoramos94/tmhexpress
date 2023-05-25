@@ -79,7 +79,7 @@ class RouteController extends Controller
             $item->order = $order;
         }
 
-        $data->history = Log::where("route_id", $data->route_id)->get();
+        $data->history = Log::where("route_id", $id)->get();
 
         return response()->json($data, 200);
     }
