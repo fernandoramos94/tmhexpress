@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GroupCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GroupCodeController extends Controller
 {
@@ -42,5 +43,14 @@ class GroupCodeController extends Controller
         GroupCode::where("id", $id)->delete();
 
         return response()->json(["ok" => true, "msg" => "Proceso realizado con exito"], 200);
+    }
+
+    public function getCodes()
+    {
+        $data = DB::select("select code as text, code as value from zip_code 
+        group by code
+        order by code asc");
+
+        return response()->json($data, 200);
     }
 }

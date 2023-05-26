@@ -131,3 +131,6 @@ Route::get('/groupCode', [GroupCodeController::class, 'list'])->middleware("auth
 Route::post('/groupCode/add', [GroupCodeController::class, 'add'])->middleware("auth:sanctum");
 Route::post('/groupCode/update', [GroupCodeController::class, 'update'])->middleware("auth:sanctum");
 Route::get('/groupCode/{id}/delete', [GroupCodeController::class, 'delete'])->middleware("auth:sanctum");
+
+
+Route::get('/codesUni/', [GroupCodeController::class, 'getCodes'])->middleware("auth:sanctum");
