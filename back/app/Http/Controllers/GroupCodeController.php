@@ -47,7 +47,7 @@ class GroupCodeController extends Controller
 
     public function getCodes()
     {
-        $data = DB::select("select code as text, code as value from zip_code 
+        $data = DB::select("select code as id, code as itemName from zip_code 
         group by code
         order by code asc");
 
