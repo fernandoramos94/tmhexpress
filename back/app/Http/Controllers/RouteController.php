@@ -10,6 +10,7 @@ use App\Models\Stops;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class RouteController extends Controller
 {
@@ -76,6 +77,8 @@ class RouteController extends Controller
         foreach ($data->data as $item) {
             $order = Order::select("contact", "identification","phone", "email", 'zip_code')->where("id", $item->order_id)->first();
             $stop = Stops::select("photo_delivery","photo_cancellation","comment_cancellation","comment_delivery")->where("order_id", $item->order_id)->first();
+
+            $stop->img = $stop->photo_delivery ? Storage::url($stop->photo_delivery) : $stop->photo_cancellation ? Storage::url($stop->photo_cancellation) : '';
             $item->order = $order;
             $item->stops = $stop;
         }
