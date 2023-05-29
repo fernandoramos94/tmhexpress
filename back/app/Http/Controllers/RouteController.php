@@ -75,7 +75,7 @@ class RouteController extends Controller
 
         foreach ($data->data as $item) {
             $order = Order::select("contact", "identification","phone", "email", 'zip_code')->where("id", $item->order_id)->first();
-            $stop = Stops::select("photo_delivery","photo_cancellation","comment_cancellation","comment_delivery")->where("orden_id", $item->order_id)->first();
+            $stop = Stops::select("photo_delivery","photo_cancellation","comment_cancellation","comment_delivery")->where("order_id", $item->order_id)->first();
             $item->order = $order;
             $item->stops = $stop;
         }
