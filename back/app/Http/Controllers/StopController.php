@@ -221,10 +221,12 @@ class StopController extends Controller
 
         $name = $na.".". explode('/', explode(':', substr($data, 0, strpos($data, ';')))[1])[1];
 
-        $disk = Storage::disk('local');
-        $disk->put($name, base64_decode($data));
+        $base64_str = substr($data, strpos($data, ",")+1);
 
-        // $disk->setVisibility($name, 'public');
+        $image = base64_decode($base64_str);
+
+        $disk = Storage::disk('local');
+        $disk->put($name, $image);
         
         $url = $disk->url($name);
 
