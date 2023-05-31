@@ -27,6 +27,13 @@ class ZipCodeController extends Controller
 
         return response()->json($data,200);
     }
+
+    public function getId($code)
+    {
+        $data = ZipCode::where("code", $code)->count();
+        return $data;
+    }
+
     public function getByCode($code)
     {
         $code = ''.$code;
