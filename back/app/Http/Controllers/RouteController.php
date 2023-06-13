@@ -25,12 +25,26 @@ class RouteController extends Controller
         return response()->json($data);
     }
 
+    public function listRoute()
+    {
+        $data = Route::where("process", 0)->get();
+        if(count($data) > 0){
+            foreach ($data as $item) {
+                $item->data = json_decode($item->data);
+                $item->driver = json_decode($item->driver);
+            }
+    
+        }
+        return response()->json($data);
+    }
+
     public function asignedDriver(Request $request){
 
         try {
             Route::where("id", $request["id"])->update(
                 [
-                    "driver" => json_encode($request["driver"])
+                    "driver" => json_encode($request["driver"]),
+                    "reasign_driver" => 1
                 ]
             );
 
@@ -40,7 +54,7 @@ class RouteController extends Controller
 
             $stop->add($route, $request["reasign_driver"]);
 
-            if($request["reasign_driver"] == false){
+            if($request["reasign_driver"] == 0){
 
                 Log::insert([
                     "route_id" => $request["id"],

@@ -106,6 +106,7 @@ Route::post('/balance', [BalanceController::class, 'getData'])->middleware('auth
 Route::post('/routes', [RouteController::class, 'list'])->middleware('auth:sanctum');
 Route::post('/routes/asignedDriver', [RouteController::class, 'asignedDriver'])->middleware('auth:sanctum');
 Route::get('/routes/{id}', [RouteController::class, 'getRoute'])->middleware('auth:sanctum');
+Route::get('/routes/list/status', [RouteController::class, 'listRoute'])->middleware('auth:sanctum');
 
 // configuracion de precios
 
