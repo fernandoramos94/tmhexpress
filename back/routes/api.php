@@ -107,6 +107,7 @@ Route::post('/routes', [RouteController::class, 'list'])->middleware('auth:sanct
 Route::post('/routes/asignedDriver', [RouteController::class, 'asignedDriver'])->middleware('auth:sanctum');
 Route::get('/routes/{id}', [RouteController::class, 'getRoute'])->middleware('auth:sanctum');
 Route::get('/routes/list/status', [RouteController::class, 'listRoute'])->middleware('auth:sanctum');
+Route::get('/routes/update/time', [RouteController::class, 'refresh'])->middleware('auth:sanctum');
 
 // configuracion de precios
 

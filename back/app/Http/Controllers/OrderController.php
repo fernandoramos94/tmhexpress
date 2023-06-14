@@ -171,8 +171,16 @@ class OrderController extends Controller
                 where orders.status_id in (1, 5, 8) and JSON_LENGTH(routes.data) is null;");
             }
         }
-        
-        return response()->json($data);
+        $time_d = DB::table("time")->orderBy('id', "desc")->first();
+
+        $t = date_create(date('Y-m-d H:i:s'));
+
+        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $minutes = $difference->days * 24 * 60;
+        $minutes += $difference->h * 60;
+        $minutes += $difference->i;
+
+        return response()->json(["data" => $data, "time" => $minutes]);
     }
 
     public function getOrdersForVerifiqued()
@@ -345,6 +353,10 @@ class OrderController extends Controller
         }
         $dataIDS = [];
 
+        $now = DB::raw('CURRENT_TIMESTAMP');
+
+        DB::table("time")->insert(["date_time" => $now]);
+
         foreach ($info as $item) {
             $locations = $item->data;
             $item->hour = $this->convertMin($item->hour);
@@ -361,6 +373,8 @@ class OrderController extends Controller
                 "driver"=> json_encode($item->driver)
             ]);
 
+            
+
             $dataIDS[] = $id;
 
             Log::insert([
@@ -372,6 +386,14 @@ class OrderController extends Controller
             ]);
         }
         
+        $time_d = DB::table("time")->orderBy('id', "desc")->first();
+
+        $t = date_create(date('Y-m-d H:i:s'));
+
+        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $minutes = $difference->days * 24 * 60;
+        $minutes += $difference->h * 60;
+        $minutes += $difference->i;
 
         $dataReturn = Route::whereIn("id", $dataIDS)->get();
 
@@ -382,7 +404,7 @@ class OrderController extends Controller
             
         }
         
-        return $dataReturn;
+        return  ["data" => $dataReturn, "time" => $minutes];
     }
 
     public function convertMin($m){

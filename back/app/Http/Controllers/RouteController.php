@@ -22,7 +22,16 @@ class RouteController extends Controller
             $item->driver = json_decode($item->driver);
         }
 
-        return response()->json($data);
+        $time_d = DB::table("time")->orderBy('id', "desc")->first();
+
+        $t = date_create(date('Y-m-d H:i:s'));
+
+        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $minutes = $difference->days * 24 * 60;
+        $minutes += $difference->h * 60;
+        $minutes += $difference->i;
+
+        return response()->json(["data"=>$data, "time" => $minutes]);
     }
 
     public function listRoute()
@@ -35,11 +44,29 @@ class RouteController extends Controller
             }
     
         }
-        return response()->json($data);
+
+        $time_d = DB::table("time")->orderBy('id', "desc")->first();
+
+        $t = date_create(date('Y-m-d H:i:s'));
+
+        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $minutes = $difference->days * 24 * 60;
+        $minutes += $difference->h * 60;
+        $minutes += $difference->i;
+
+        return response()->json(["data"=>$data, "time" => $minutes]);
+    }
+
+    public function refresh()
+    {
+        $now = DB::raw('CURRENT_TIMESTAMP');
+        DB::table("time")->insert(["date_time" => $now]);
+
+        Route::where("process", 0)->update(["process" => 1]);
+
     }
 
     public function asignedDriver(Request $request){
-
         try {
             Route::where("id", $request["id"])->update(
                 [
