@@ -132,13 +132,6 @@ class OrderController extends Controller
         $data = [];
         if($request->user()->type_user == 2 || $request->user()->type_user == 3){
             if ($request["column"] == "created_at") {
-                // $data = Order::select("orders.*", "status.status", "stops.photo_cancellation", "stops.photo_delivery","stops.photo_pickup", "stops.signature_delivery", "stops.signature_pickup")->where("user_id", $request->user()->id)
-                // ->join("status", "orders.status_id", "=", "status.id")
-                // ->leftJoin('stops', function($join){
-                //     $join->on('orders.id', '=', 'stops.order_id')
-                //     ->on('stops.moveType_id', '=', 'orders.moveType_id');
-                // })->get();
-
                 $data = DB::select("select orders.*, st.status, stops.photo_cancellation, stops.photo_delivery, stops.photo_pickup, stops.signature_delivery, stops.signature_pickup
                 from orders
                 inner join status as st on orders.status_id = st.id
@@ -152,14 +145,6 @@ class OrderController extends Controller
                 from orders
                 inner join status as st on orders.status_id = st.id
                 left join stops on orders.id = stops.order_id and stops.moveType_id = orders.moveType_id");
-                // $data = Order::select("orders.*", "status.status", "stops.photo_cancellation", "stops.photo_delivery","stops.photo_pickup", "stops.signature_delivery", "stops.signature_pickup")
-                // ->join("status", "orders.status_id", "=", "status.id")
-                // ->leftJoin('stops', function($join){
-                //     $join->on('orders.id', '=', 'stops.order_id')
-                //     ->on('stops.moveType_id', '=', 'orders.moveType_id');
-                // })
-                // ->toSql();
-                // ->get();
             } elseif ($request["column"] == "status") {
                 $data = Order::select("orders.*", "status.status")->whereIn('orders.status_id', [1, 5, 8])
                 ->join("status", "orders.status_id", "=", "status.id")->get();
