@@ -81,6 +81,7 @@ Route::post('/finishStop', [StopController::class, 'finishStop']);
 Route::post('/cancelStop', [StopController::class, 'cancelStop']);
 Route::get('/stopsDriverFinish/{imei}', [StopController::class, 'getStopsFinish']); 
 Route::get('/stopsDriver/{imei}', [StopController::class, 'getStops']);
+Route::post('/uploadFile/{id}', [StopController::class, 'uploadFile']);
 
 // estados de cancelacion
 Route::get('/reasons', [CancellationReasonController::class, 'getReason']);

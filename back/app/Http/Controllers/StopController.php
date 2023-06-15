@@ -201,12 +201,7 @@ class StopController extends Controller
                     "msg" => "Realizado por ". $driver->name
                 ]);
             }
-
-            
-
             // $this->sendEmail($request["order_id"]);
-
-
 
             return response()->json(array("message" => "Proceso realizado con exito"), 200);
         } catch (Exception $e) {
@@ -231,6 +226,21 @@ class StopController extends Controller
         $url = $disk->url($name);
 
         return $url;
+    }
+
+    public function uploadFile(Request $request, $id)
+    {
+        $file = $request->file('file');
+        if($file){
+            $filename = time().$file->getClientOriginalName();
+            $disk = Storage::disk('local');
+            $disk->put($filename, file_get_contents($file));
+            $url = $disk->url($filename);
+
+            Stops::where("id", $id)->update(["photo_delivery" => $url]);
+
+            return response()->json(array("message" => "Imagen cargada de forma exitosa"), 200);
+        }
     }
 
     public function cancelStop(Request $request)
