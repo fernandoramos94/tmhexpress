@@ -109,6 +109,7 @@ Route::post('/routes/asignedDriver', [RouteController::class, 'asignedDriver'])-
 Route::get('/routes/{id}', [RouteController::class, 'getRoute'])->middleware('auth:sanctum');
 Route::get('/routes/list/status', [RouteController::class, 'listRoute'])->middleware('auth:sanctum');
 Route::get('/routes/update/time', [RouteController::class, 'refresh'])->middleware('auth:sanctum');
+Route::post('/routes/reasignedZone', [RouteController::class, 'reasignedZone'])->middleware('auth:sanctum');
 
 // configuracion de precios
 
@@ -134,6 +135,7 @@ Route::get('/groupCode', [GroupCodeController::class, 'list'])->middleware("auth
 Route::post('/groupCode/add', [GroupCodeController::class, 'add'])->middleware("auth:sanctum");
 Route::post('/groupCode/update', [GroupCodeController::class, 'update'])->middleware("auth:sanctum");
 Route::get('/groupCode/{id}/delete', [GroupCodeController::class, 'delete'])->middleware("auth:sanctum");
+Route::get("/groupCode/list/{id}", [GroupCodeController::class, 'getGroup'])->middleware("auth:sanctum");
 
 
 Route::get('/codesUni/', [GroupCodeController::class, 'getCodes'])->middleware("auth:sanctum");

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class RouteController extends Controller
 {
@@ -125,5 +126,84 @@ class RouteController extends Controller
         $data->history = Log::where("route_id", $id)->get();
 
         return response()->json($data, 200);
+    }
+
+    public function reasignedZone(Request $request)
+    {
+
+        $orderC = new OrderController();
+
+        $next = Route::find($request["id"]);
+        $last = Route::find($request["id_last"]);
+        $last_data = json_decode($last->data);
+        $next_data = json_decode($next->data);
+        $kms_last = 0;
+        $hour_last = 0;
+
+        foreach ($last_data as $key => $value) {
+            if((int)$value->order_id == (int)$request["data"]["order_id"]){
+                unset($last_data[$key]);
+            }else{
+                $kms_last += (float)$value->km;
+                $hour_last += (int)$value->hour;
+            }
+        }
+
+        $last->kms = $kms_last;
+        $last->hours = $orderC->convertMin($hour_last);
+        $endNext = end($next_data);
+
+        $from = $endNext->lat . "," . $endNext->long; //direccion del ultimo registro
+        $to = $request["data"]["lat"] . "," . $request["data"]["long"]; // direccion del nuevo registro
+
+        $from = urlencode($from);
+        $to = urlencode($to);
+
+        $data = $orderC->calculate($from, $to);
+
+        $next_km = $data->rows[0]->elements[0]->distance->value / 1000;
+        $next_hour = $data->rows[0]->elements[0]->duration->value;
+
+        $tmp = new stdClass;
+        $tmp->km = (float)$next_km;
+        $tmp->lat = $request["data"]["lat"];
+        $tmp->hour = (int)$next_hour;
+        $tmp->long = $request["data"]["long"];
+        $tmp->address = $request["data"]["address"];
+        $tmp->fallido = (int)$request["data"]["fallido"];
+        $tmp->order_id = (int)$request["data"]["order_id"];
+        $tmp->entregado = (int)$request["data"]["entregado"];
+
+        $next_data[] = $tmp;
+
+        $kms_next = 0;
+        $hours_next = 0;
+        foreach ($next_data as $key => $value) {
+            $kms_next += (float)$value->km;
+            $hours_next += (int)$value->hour;
+        }
+
+        $next->hours = $orderC->convertMin($hours_next);
+        $next->kms = $kms_next;
+
+        $next->data = json_encode($next_data);
+        $last->data = json_encode($last_data);
+
+        Order::where("id", $request["data"]["order_id"])->update(["zone" => $next->zone]);
+
+        Route::where("id", $request["id"])->update([
+            "kms" => $next->kms,
+            "stops" => count($next_data),
+            "hours" => $next->hours,
+            "data" => $next->data
+        ]);
+        Route::where("id", $request["id_last"])->update([
+            "kms" => $last->kms,
+            "stops" => count($last_data),
+            "hours" => $last->hours,
+            "data" => $last->data
+        ]);
+
+        return response()->json(["msg" => "Se ha reasignacioón de forma existosa"], 200);
     }
 }

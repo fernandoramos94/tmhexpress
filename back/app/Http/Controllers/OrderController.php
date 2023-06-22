@@ -38,27 +38,26 @@ class OrderController extends Controller
 
         ]);
 
-        if(isset($request["price"])){
+        if (isset($request["price"])) {
             $bal = Balance::where("user_id", $request->user()->id)->first();
 
             $total = count((array)$bal) > 0 ? (int)$bal->balance - (int)$request["price"] : 0;
 
-            if(count((array)$bal) > 0 ){
-                if($total <= 0){
+            if (count((array)$bal) > 0) {
+                if ($total <= 0) {
                     return response()->json(["message" => "No cuentas con suficiente creditos para crear la orden, te recomendamos cargar tu cuenta para proceder con el proceso.", "ok" => false], 200);
-                }else{
+                } else {
                     Balance::where("id", $bal->id)->update([
                         "balance" => $total
                     ]);
                 }
-                
-            }else{
+            } else {
                 return response()->json(["message" => "No cuentas con suficiente creditos para crear la orden, te recomendamos cargar tu cuenta para proceder con el proceso.", "ok" => false], 200);
             }
         }
 
-        $zone = GroupCode::where('codes', 'LIKE', '%'.intval(''.$request["zip_code"]).'%')->first();
-    
+        $zone = GroupCode::where('codes', 'LIKE', '%' . intval('' . $request["zip_code"]) . '%')->first();
+
 
         $data = Order::create([
             "contact" => $request["contact"],
@@ -84,7 +83,7 @@ class OrderController extends Controller
             "status_id" => 8,
             "moveType_id" => 2,
             "guide" => $this->generateUniqueCode(),
-            "zip_code" => intval(''.$request["zip_code"]),
+            "zip_code" => intval('' . $request["zip_code"]),
             "zone" => $zone->name
         ]);
 
@@ -93,10 +92,10 @@ class OrderController extends Controller
             "status_id" => 1
         ]);
 
-        
+
 
         if ($data) {
-            return response()->json( ["message" => "La orden a sido creada de forma exitosa.", "ok" => true], 200);
+            return response()->json(["message" => "La orden a sido creada de forma exitosa.", "ok" => true], 200);
         } else {
             return response()->json(["message" => "Se ha presentado un error al crear la orden"], 400);
         }
@@ -110,8 +109,8 @@ class OrderController extends Controller
         $neworder->date_order = $date;
         $neworder->status_id = 8;
         $save = $neworder->save();
-        if($save){
-            return response()->json( ["message" => "La orden a sido replicada de forma exitosa."], 200);
+        if ($save) {
+            return response()->json(["message" => "La orden a sido replicada de forma exitosa."], 200);
         } else {
             return response()->json(["message" => "Se ha presentado un error al replicar la orden"], 400);
         }
@@ -130,15 +129,15 @@ class OrderController extends Controller
     {
 
         $data = [];
-        if($request->user()->type_user == 2 || $request->user()->type_user == 3){
+        if ($request->user()->type_user == 2 || $request->user()->type_user == 3) {
             if ($request["column"] == "created_at") {
                 $data = DB::select("select orders.*, st.status, stops.photo_cancellation, stops.photo_delivery, stops.photo_pickup, stops.signature_delivery, stops.signature_pickup
                 from orders
                 inner join status as st on orders.status_id = st.id
                 left join stops on orders.id = stops.order_id and stops.moveType_id = orders.moveType_id
-                where orders.user_id = '".$request->user()->id."'");
+                where orders.user_id = '" . $request->user()->id . "'");
             }
-        }else{
+        } else {
             if ($request["column"] == "created_at") {
 
                 $data = DB::select("select orders.*, st.status, stops.photo_cancellation, stops.photo_delivery, stops.photo_pickup, stops.signature_delivery, stops.signature_pickup
@@ -147,8 +146,8 @@ class OrderController extends Controller
                 left join stops on orders.id = stops.order_id and stops.moveType_id = orders.moveType_id");
             } elseif ($request["column"] == "status") {
                 $data = Order::select("orders.*", "status.status")->whereIn('orders.status_id', [1, 5, 8])
-                ->join("status", "orders.status_id", "=", "status.id")->get();
-            }else if($request["column"] == 'route'){
+                    ->join("status", "orders.status_id", "=", "status.id")->get();
+            } else if ($request["column"] == 'route') {
                 $data = DB::select("SELECT orders.*, JSON_LENGTH(routes.data) as co FROM 
                 orders
                 LEFT JOIN routes on
@@ -160,7 +159,7 @@ class OrderController extends Controller
 
         $t = date_create(date('Y-m-d H:i:s'));
 
-        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $difference = date_diff($t, date_create($time_d->date_time));
         $minutes = $difference->days * 24 * 60;
         $minutes += $difference->h * 60;
         $minutes += $difference->i;
@@ -201,15 +200,14 @@ class OrderController extends Controller
         return response()->json([
             "msg" => "Proceso realizado de forma existosa."
         ], 200);
-        
     }
 
     public function validateOrderDriver($id)
     {
         $data = Order::select("orders.*", "status.status")->where("guide", $id)->join("status", "orders.status_id", "=", "status.id")->first();
 
-        if($data){
-            if($data->status_id == 9){
+        if ($data) {
+            if ($data->status_id == 9) {
                 Order::where("id", $data->id)->update([
                     "status_id" => 10
                 ]);
@@ -217,31 +215,29 @@ class OrderController extends Controller
                     [
                         "ok" => true,
                         "msg" => "Orden verificada de forma exitosa"
-                    ], 200
+                    ],
+                    200
                 );
-            }else{
+            } else {
                 return response()->json([
                     "ok" => false,
-                    "msg" => "No he posible verificar la guia, estado actual(".$data->status.")"
+                    "msg" => "No he posible verificar la guia, estado actual(" . $data->status . ")"
                 ], 200);
             }
-        }else{
+        } else {
             return response()->json([
                 "ok" => false,
                 "msg" => "La orden que intenta consultar no se encuentra registrada en nuestra base de datos"
             ], 200);
         }
-
-        
-        
     }
 
     public function validateOrderAdmin($id)
     {
         $data = Order::select("orders.*", "status.status")->where("guide", $id)->join("status", "orders.status_id", "=", "status.id")->first();
 
-        if($data){
-            if($data->status_id == 10){
+        if ($data) {
+            if ($data->status_id == 10) {
                 Order::where("id", $data->id)->update([
                     "status_id" => 1
                 ]);
@@ -249,21 +245,21 @@ class OrderController extends Controller
                     [
                         "ok" => true,
                         "msg" => "Orden verificada de forma exitosa"
-                    ], 200
+                    ],
+                    200
                 );
-            }else{
+            } else {
                 return response()->json([
                     "ok" => false,
-                    "msg" => "No he posible verificar la guia, estado actual(".$data->status.")"
+                    "msg" => "No he posible verificar la guia, estado actual(" . $data->status . ")"
                 ], 200);
             }
-        }else{
+        } else {
             return response()->json([
                 "ok" => false,
                 "msg" => "La orden que intenta consultar no se encuentra registrada en nuestra base de datos"
             ], 200);
         }
-        
     }
 
     public function printOrder(Request $request, $id)
@@ -279,10 +275,10 @@ class OrderController extends Controller
     {
 
         $info = explode(",", $id);
-        $data = Order::select("orders.*", "clients.name as client_name" , "clients.last_name as client_lastName", "clients.identification_number")
-                ->whereIn("orders.id", $info)
-                ->leftJoin("clients", "clients.user_id", "=", "orders.user_id")
-                ->get();
+        $data = Order::select("orders.*", "clients.name as client_name", "clients.last_name as client_lastName", "clients.identification_number")
+            ->whereIn("orders.id", $info)
+            ->leftJoin("clients", "clients.user_id", "=", "orders.user_id")
+            ->get();
         // print_r($data);
         $pdf = PDF::loadView('print_orders', array("data" => $data));
 
@@ -293,7 +289,8 @@ class OrderController extends Controller
     {
         date_default_timezone_set('America/Mexico_City');
 
-        $info = DB::select("
+        $info = DB::select(
+            "
             select zone as zona, SUM(1) as stops, 0 as kms, 0 as hour, 'En proceso' as status,
             JSON_ARRAYAGG(
                 JSON_OBJECT(
@@ -312,7 +309,7 @@ class OrderController extends Controller
                 'name', ''
             ) as driver
             FROM orders
-            WHERE id in( ".implode(",",$request["data"])." ) 
+            WHERE id in( " . implode(",", $request["data"]) . " ) 
             AND  (status_id = 1 or status_id = 5 or status_id = 8)
             GROUP BY zone"
         );
@@ -322,7 +319,7 @@ class OrderController extends Controller
             $item->data = json_decode($item->data);
             $item->driver = json_decode($item->driver);
             $dataArray = $item->data;
-            for ($i=0; $i < count($dataArray) ; $i++) { 
+            for ($i = 0; $i < count($dataArray); $i++) {
                 $from = "19.573382081680197, -99.2023109033435"; //direccion de thmexpress
                 $to = $dataArray[$i]->lat . "," . $dataArray[$i]->long;
 
@@ -346,7 +343,7 @@ class OrderController extends Controller
             $locations = $item->data;
             $item->hour = $this->convertMin($item->hour);
             $item->kms = $item->kms / 1000;
-            array_multisort(array_column($locations, "km"),SORT_ASC,$locations);
+            array_multisort(array_column($locations, "km"), SORT_ASC, $locations);
 
             $id = Route::insertGetId([
                 "zone" => $item->zona,
@@ -355,10 +352,10 @@ class OrderController extends Controller
                 "stops" => $item->stops,
                 "status" => $item->status,
                 "data" => json_encode($item->data),
-                "driver"=> json_encode($item->driver)
+                "driver" => json_encode($item->driver)
             ]);
 
-            
+
 
             $dataIDS[] = $id;
 
@@ -367,15 +364,15 @@ class OrderController extends Controller
                 "user" => $request->user()->name,
                 "type_user" => 1,
                 "type" => "Creación de ruta",
-                "msg" => "Realizado por ". $request->user()->name
+                "msg" => "Realizado por " . $request->user()->name
             ]);
         }
-        
+
         $time_d = DB::table("time")->orderBy('id', "desc")->first();
 
         $t = date_create(date('Y-m-d H:i:s'));
 
-        $difference = date_diff( $t, date_create($time_d->date_time)); 
+        $difference = date_diff($t, date_create($time_d->date_time));
         $minutes = $difference->days * 24 * 60;
         $minutes += $difference->h * 60;
         $minutes += $difference->i;
@@ -386,23 +383,38 @@ class OrderController extends Controller
             $item->data = json_decode($item->data);
             $item->driver = json_decode($item->driver);
             $item->reasign_driver = $item->driver->id != "" ? true : false;
-            
         }
-        
+
         return  ["data" => $dataReturn, "time" => $minutes];
     }
 
-    public function convertMin($m){
-        $d = (int)($m/1440);
-        $m -= $d*1440;
-         
-        $h = (int)($m/60);
-        $m -= $h*60;
-         
-        return $h.":".$m." hrs"; // array("horas" => $h, "minutos" => $m);
+    public function convertMin($Segundos)
+    {
+        $Horas = $Segundos / (60 * 60);
+
+        $Dias = $Horas / 24;
+
+        #Obtengo $Dias
+        $Array = explode(".", $Dias);
+        $Dias = $Array[0];
+        $Horas = $Array[1];
+
+        #Obtengo $Horas
+        $Horas = ("0." . $Horas) * 24;
+        $Array = explode(".", $Horas);
+        $Horas = $Array[0];
+        $Minutos = $Array[1];
+
+        #Obtengo minutos
+        $Minutos = ("0." . $Minutos) * 60;
+        $Array = explode(".", $Minutos);
+        $Minutos = $Array[0];
+
+        return $Dias . ' días - ' . $Horas . ' hrs ' . $Minutos . ' mins';
     }
 
-    public function resetKey($data){
+    public function resetKey($data)
+    {
         $retr = [];
         foreach ($data as $info) {
             $retr[] = $info;
@@ -420,7 +432,7 @@ class OrderController extends Controller
             ->whereIn("id", $request["data"])
             ->get()->toArray();
 
-        $locations =$destination;
+        $locations = $destination;
 
         for ($i = 0; $i < count($locations); $i++) {
             $from = "19.573382081680197, -99.2023109033435"; //direccion de thmexpress
@@ -465,9 +477,9 @@ class OrderController extends Controller
         $file = $request->file("file");
         $resp = Excel::import(new OrderImport, $file);
 
-        if($resp){
+        if ($resp) {
             return response()->json(["message" => "se han importado las ordenes de forma exitosa. "], 200);
-        }else{
+        } else {
             return response()->json(["message" => "se ha presentado un error al importar las ordenes. "], 400);
         }
     }
@@ -478,9 +490,9 @@ class OrderController extends Controller
 
         $stop = [];
         $moveType = null;
-        if($request["type"] == "1"){ //cancelar recogida
+        if ($request["type"] == "1") { //cancelar recogida
 
-            if(in_array($query->status_id, [1,2])){
+            if (in_array($query->status_id, [1, 2])) {
                 $stop = [
                     "status_id" => 6,
                     "finish" => 1,
@@ -488,14 +500,13 @@ class OrderController extends Controller
                     "comment_cancellation" => $request["comment_cancellation"]
                 ];
                 $moveType = 1;
-            }
-            else if($query->status_id == 3){
+            } else if ($query->status_id == 3) {
                 return response()->json(["message" => "No es posible cancelar la orden, el pedido ya fue recolectado.", "icon" => "info"], 200);
-            } else if($query->status_id == 6){
+            } else if ($query->status_id == 6) {
                 return response()->json(["message" => "La orden ya se encuentra cancelada", "icon" => "info"]);
             }
-        }else{ // cancelar entrega
-            if(in_array($query->status_id, [1,2,3,5])){
+        } else { // cancelar entrega
+            if (in_array($query->status_id, [1, 2, 3, 5])) {
                 $stop = [
                     "status_id" => 7,
                     "finish" => 1,
@@ -503,9 +514,9 @@ class OrderController extends Controller
                     "comment_cancellation" => $request["comment_cancellation"]
                 ];
                 $moveType = 2;
-            }else if($query->status_id == 4){
+            } else if ($query->status_id == 4) {
                 return response()->json(["message" => "No es posible cancelar la orden, el pedido ya fue entregado.", "icon" => "info"], 200);
-            }else if($query->status_id == 6){
+            } else if ($query->status_id == 6) {
                 return response()->json(["message" => "La orden ya se encuentra cancelada", "icon" => "info"]);
             }
         }
@@ -519,10 +530,10 @@ class OrderController extends Controller
     public function apiOrder(Request $request)
     {
         $headers = $request->header();
-        
+
         $authorization = $request->header('Authorization');
 
-        if(!$authorization){
+        if (!$authorization) {
             return response()->json([
                 "message" => "Cliente no autorizado para ejecutar la acción"
             ], 400);
@@ -531,7 +542,7 @@ class OrderController extends Controller
 
         $id_client = DB::table("secred_id")->select("user_id", "token")->where("token", $authorization[1])->first();
 
-        if(!$id_client){
+        if (!$id_client) {
             return response()->json(["message" => "Cliente no autorizado para ejecutar la acción"], 400);
         }
 
@@ -551,7 +562,7 @@ class OrderController extends Controller
             "package.product_type" => "required",
             "package.content" => "required"
         ])->validate();
-        
+
         $data = Order::create([
             "contact" => $request["contact"]["full_name"],
             "identification" => $request["contact"]["identification_number"],
@@ -584,7 +595,7 @@ class OrderController extends Controller
         ]);
 
         if ($data) {
-            return response()->json( [
+            return response()->json([
                 "order_id" => $data->id,
                 "tracking_number" => $data->guide,
                 "message" => "La orden a sido creada de forma exitosa."
@@ -592,16 +603,15 @@ class OrderController extends Controller
         } else {
             return response()->json(["message" => "Se ha presentado un error al crear la orden"], 400);
         }
-        
     }
 
     public function apiOrderGet(Request $request)
     {
         $headers = $request->header();
-        
+
         $authorization = $request->header('Authorization');
 
-        if(!$authorization){
+        if (!$authorization) {
             return response()->json([
                 "message" => "Cliente no autorizado para ejecutar la acción"
             ], 400);
@@ -610,7 +620,7 @@ class OrderController extends Controller
 
         $id_client = DB::table("secred_id")->select("user_id", "token")->where("token", $authorization[1])->first();
 
-        if(!$id_client){
+        if (!$id_client) {
             return response()->json(["message" => "Cliente no autorizado para ejecutar la acción"], 400);
         }
 
@@ -621,9 +631,7 @@ class OrderController extends Controller
     public function getOrderForGuide(Request $request)
     {
         $data = Order::select("orders.*", "status.status")->where('guide', $request["guide"])->join("status", "orders.status_id", "=", "status.id")->get();
-        
+
         return response()->json($data, 200);
     }
-
-    
 }

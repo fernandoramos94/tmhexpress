@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GroupCode;
+use App\Models\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +17,12 @@ class GroupCodeController extends Controller
         foreach ($data as $item) {
             $item->codes = json_decode($item->codes);
         }
+
+        return response()->json($data, 200);
+    }
+    public function getGroup($id)
+    {
+        $data = Route::select("id", "zone as name")->where("process", "0")->whereNotIn("id", [$id])->get();
 
         return response()->json($data, 200);
     }
