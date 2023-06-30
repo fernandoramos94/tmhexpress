@@ -178,7 +178,7 @@ class RouteController extends Controller
 
         $kms_next = 0;
         $hours_next = 0;
-        foreach ($next_data as $key => $value) {
+        foreach ($next_data as $value) {
             $kms_next += (float)$value->km;
             $hours_next += (int)$value->hour;
         }
@@ -187,7 +187,7 @@ class RouteController extends Controller
         $next->kms = $kms_next;
 
         $next->data = json_encode($next_data);
-        $last->data = json_encode($last_data);
+        $last->data = json_encode(array_values($last_data));
 
         Order::where("id", $request["data"]["order_id"])->update(["zone" => $next->zone]);
 
