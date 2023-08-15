@@ -85,13 +85,37 @@ class StopController extends Controller
     {
 
 
+        // $data = DB::select("
+        //     select stops.*, orders.contact, orders.phone, orders.zip_code, routes.id as route_id from stops 
+        //     inner join orders on orders.id = stops.order_id 
+        //     inner join drivers on stops.driver_id = drivers.id 
+        //     LEFT JOIN routes on json_contains(data->'$[*].order_id', json_array(orders.id))
+        //     where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()->toDateString()."' order by stops.index asc
+        // ");
+
         $data = DB::select("
-            select stops.*, orders.contact, orders.phone, orders.zip_code, routes.id as route_id from stops 
-            inner join orders on orders.id = stops.order_id 
-            inner join drivers on stops.driver_id = drivers.id 
-            LEFT JOIN routes on json_contains(data->'$[*].order_id', json_array(orders.id))
-            where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()->toDateString()."' order by stops.index asc
+            SELECT routes.* FROM routes LEFT JOIN drivers on JSON_EXTRACT(routes.driver, '$.id') = drivers.id 
+            WHERE routes.deliver_date = '".Carbon::now()->toDateString()."' and drivers.identification_phone = '".$imei."';
         ");
+
+        foreach ($data as $route) {
+
+            $route->data = json_decode($route->data);
+            $route->driver = json_decode($route->driver);
+
+            foreach ($route->data as $order) {
+                $data_order = DB::select("
+                    select stops.*, orders.contact, orders.phone, orders.zip_code from stops 
+                    inner join orders on orders.id = stops.order_id 
+                    inner join drivers on stops.driver_id = drivers.id 
+                    where orders.id = ".$order->order_id."
+                    order by stops.index asc
+                ");
+
+                $order->order = $data_order[0];
+            }
+        }
+
 
         return response()->json(array("data" => $data, "orwr" => Carbon::now()), 200);
     }
