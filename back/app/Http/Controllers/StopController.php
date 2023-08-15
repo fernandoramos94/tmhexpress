@@ -95,7 +95,8 @@ class StopController extends Controller
 
         $data = DB::select("
             SELECT routes.* FROM routes LEFT JOIN drivers on JSON_EXTRACT(routes.driver, '$.id') = drivers.id 
-            WHERE routes.deliver_date = '".Carbon::now()->toDateString()."' and drivers.identification_phone = '".$imei."';
+            WHERE routes.deliver_date = '".Carbon::now()->toDateString()."' and drivers.identification_phone = '".$imei."'
+            group by routes.zone, routes.id;
         ");
 
         foreach ($data as $route) {
