@@ -7,6 +7,7 @@ use App\Models\Log;
 use App\Models\Order;
 use App\Models\Route;
 use App\Models\Stops;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -45,6 +46,9 @@ class RouteController extends Controller
             }
     
         }
+
+        $now = DB::raw('CURRENT_TIMESTAMP');
+        DB::table("time")->insert(["date_time" => $now]);
 
         $time_d = DB::table("time")->orderBy('id', "desc")->first();
 

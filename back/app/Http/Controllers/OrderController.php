@@ -301,7 +301,8 @@ class OrderController extends Controller
                     'km', 0,
                     'hour', 0,
                     'entregado', 0,
-                    'fallido', 0
+                    'fallido', 0,
+                    'pitado', 0
                )
             )as data,
             JSON_OBJECT(
@@ -339,6 +340,8 @@ class OrderController extends Controller
 
         DB::table("time")->insert(["date_time" => $now]);
 
+        $date = Carbon::now();
+
         foreach ($info as $item) {
             $locations = $item->data;
             $item->hour = $this->convertMin($item->hour);
@@ -352,10 +355,9 @@ class OrderController extends Controller
                 "stops" => $item->stops,
                 "status" => $item->status,
                 "data" => json_encode($item->data),
-                "driver" => json_encode($item->driver)
+                "driver" => json_encode($item->driver),
+                "deliver_date" => $date->toDateString() < $date ? $date->toDateString() : $date->addDay(1)->toDateString()
             ]);
-
-
 
             $dataIDS[] = $id;
 

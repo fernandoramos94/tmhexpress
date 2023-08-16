@@ -93,13 +93,27 @@ class StopController extends Controller
         //     where (drivers.identification_phone = '".$imei."' and finish = 0) and date(stops.date_order) = '".Carbon::now()->toDateString()."' order by stops.index asc
         // ");
 
+        // $date = Carbon::now();
+
+        // echo $date->toDateString() < $date ? $date->toDateString() : $date->addDay(1)->toDateString();
+        
         $data = DB::select("
-            SELECT routes.* FROM routes LEFT JOIN drivers on JSON_EXTRACT(routes.driver, '$.id') = drivers.id 
-            WHERE routes.deliver_date = '".Carbon::now()->toDateString()."' and drivers.identification_phone = '".$imei."'
+            SELECT routes.*, '0' as entregados, '0' as fallidos FROM routes 
+            LEFT JOIN drivers on JSON_EXTRACT(routes.driver, '$.id') = drivers.id 
+            WHERE routes.deliver_date = '".Carbon::now()->toDateString()."' and drivers.identification_phone = '".$imei."' and routes.closed = 0  
             group by routes.zone, routes.id;
         ");
 
         foreach ($data as $route) {
+
+            $contador = DB::select("select sum(fallidos) as fallidos, sum(entregados) as entregados from routes, 
+                JSON_TABLE(data, '$[*]' COLUMNS (fallidos INT PATH '$.fallido', entregados INT PATH '$.entregado')) as t
+                where routes.id = ".$route->id."
+                group by id"
+            );
+
+            $route->entregados = (int)$contador[0]->entregados;
+            $route->fallidos = (int)$contador[0]->fallidos;
 
             $route->data = json_decode($route->data);
             $route->driver = json_decode($route->driver);
@@ -204,6 +218,7 @@ class StopController extends Controller
             foreach ($orders as $item) {
                 if($item->order_id == $request["order_id"]){
                     $item->entregado = 1;
+                    $item->pitado = 1;
 
                     $execute += 1;
                 }
@@ -231,7 +246,8 @@ class StopController extends Controller
             return response()->json(array("message" => "Proceso realizado con exito"), 200);
         } catch (Exception $e) {
             return response()->json(array(
-                "message" => $e->getMessage()
+                "message" => $e->getMessage(),
+                "data" => $data["comment_delivery"]
             ), 400);
         }
     }
